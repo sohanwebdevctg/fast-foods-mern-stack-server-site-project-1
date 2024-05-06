@@ -28,6 +28,14 @@ async function run() {
     await client.connect();
 
     //all data table here
+    const allFastFoodsCollections = client.db("fastFoodsBD").collection("allFastFoods");
+
+
+    // get allFastFoods data
+    app.get('/allFastFoods', async (req, res) => {
+      const allFastFoods = await allFastFoodsCollections.find().toArray();
+      res.send(allFastFoods);
+    })
 
 
     // Send a ping to confirm a successful connection
