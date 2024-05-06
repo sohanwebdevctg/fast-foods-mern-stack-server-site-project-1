@@ -51,7 +51,7 @@ async function run() {
       if(req.query?.email){
         query = {email: req.query?.email}
       }
-      const result = await userCartsCollections.findOne(query);
+      const result = await userCartsCollections.find(query).toArray();
       res.send(result)
     })
 
