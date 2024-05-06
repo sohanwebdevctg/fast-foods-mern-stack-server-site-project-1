@@ -29,12 +29,20 @@ async function run() {
 
     //all data table here
     const allFastFoodsCollections = client.db("fastFoodsBD").collection("allFastFoods");
+    const userCartsCollections = client.db("fastFoodsBD").collection("userCarts");
 
 
     // get allFastFoods data
     app.get('/allFastFoods', async (req, res) => {
       const allFastFoods = await allFastFoodsCollections.find().toArray();
       res.send(allFastFoods);
+    })
+
+    // post user carts data
+    app.post('/userCarts', async (req, res) => {
+      const userCarts = req.body;
+      const result = await userCartsCollections.insertOne(userCarts);
+      res.send(result)
     })
 
 
