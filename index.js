@@ -55,6 +55,14 @@ async function run() {
       res.send(result)
     })
 
+    //get single user data
+    app.get('/userCarts/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await userCartsCollections.findOne(query);
+      res.send(result)
+    })
+
     //delete user cart data
     app.delete('/userCarts/:id', async(req, res) => {
       const id = req.params.id;
