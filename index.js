@@ -3,7 +3,7 @@ const app = express()
 const cors = require('cors')
 require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const port = process.env.PORT || 5000
+const port = process.env.PORT || 5000;
 
 // middleware
 app.use(cors())
@@ -60,6 +60,21 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await userCartsCollections.findOne(query);
+      res.send(result)
+    })
+
+    // update single user quantity data
+    app.put('/userCarts/:id', async (req, res) => {
+      const id = req.params.id;
+      const data = req.body;
+      const query = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          quantity : parseInt(data.quantity, 10)
+        },
+      };
+      const options = { upsert: true };
+      const result = await userCartsCollections.updateOne(query, updateDoc, options);
       res.send(result)
     })
 
