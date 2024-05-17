@@ -55,6 +55,29 @@ async function run() {
       res.send(result);
     })
 
+    //put the single user data quantity
+    app.put('/carts/:id', async (req, res) => {
+      const id = req.params.id;
+      const body = req.body;
+      const filter = {_id : new ObjectId(id)}
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          quantity: parseInt(body.quantity, 10)
+        },
+      };
+      const result = await cartsCollections.updateOne(filter, updateDoc, options);
+      res.send(result);
+    })
+
+    //delete single user cart data
+    app.delete('/carts/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id : new ObjectId(id)};
+      const result = await cartsCollections.deleteOne(query);
+      res.send(result)
+    });
+
 
 
     // Send a ping to confirm a successful connection
