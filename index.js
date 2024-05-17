@@ -29,7 +29,6 @@ async function run() {
 
     //all data table here
     const allFastFoodsCollections = client.db("fastFoodsBD").collection("allFastFoods");
-    const userCartsCollections = client.db("fastFoodsBD").collection("userCarts");
 
 
     // get allFastFoods data
@@ -38,53 +37,6 @@ async function run() {
       res.send(allFastFoods);
     })
 
-    // post user carts data
-    app.post('/userCarts', async (req, res) => {
-      const userCarts = req.body;
-      const result = await userCartsCollections.insertOne(userCarts);
-      res.send(result)
-    })
-
-    //get user cart data in email
-    app.get('/userCarts', async (req, res) => {
-      let query = {}
-      if(req.query?.email){
-        query = {email: req.query?.email}
-      }
-      const result = await userCartsCollections.find(query).toArray();
-      res.send(result)
-    })
-
-    //get single user data
-    app.get('/userCarts/:id', async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await userCartsCollections.findOne(query);
-      res.send(result)
-    })
-
-    // update single user quantity data
-    app.put('/userCarts/:id', async (req, res) => {
-      const id = req.params.id;
-      const data = req.body;
-      const query = { _id: new ObjectId(id) };
-      const updateDoc = {
-        $set: {
-          quantity : parseInt(data.quantity, 10)
-        },
-      };
-      const options = { upsert: true };
-      const result = await userCartsCollections.updateOne(query, updateDoc, options);
-      res.send(result)
-    })
-
-    //delete user cart data
-    app.delete('/userCarts/:id', async(req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await userCartsCollections.deleteOne(query);
-      res.send(result);
-    })
 
 
     // Send a ping to confirm a successful connection
