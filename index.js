@@ -29,12 +29,30 @@ async function run() {
 
     //all data table here
     const allFastFoodsCollections = client.db("fastFoodsBD").collection("allFastFoods");
+    const cartsCollections = client.db("fastFoodsBD").collection("carts");
 
 
     // get allFastFoods data
     app.get('/allFastFoods', async (req, res) => {
       const allFastFoods = await allFastFoodsCollections.find().toArray();
       res.send(allFastFoods);
+    })
+
+    //post single user carts data
+    app.post('/carts', async (req, res) => {
+      const data = req.body;
+      const result = await cartsCollections.insertOne(data);
+      res.send(result);
+    })
+
+    //get sing user carts data from email address
+    app.get('/carts', async (req, res) => {
+      let query = {}
+      if(req.query?.email){
+        query = {email: req.query?.email}
+      }
+      const result = await cartsCollections.find(query).toArray();
+      res.send(result);
     })
 
 
