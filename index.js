@@ -28,6 +28,7 @@ async function run() {
     await client.connect();
 
     //all data table here
+    const usersCollections = client.db("fastFoodsBD").collection("users");
     const allFastFoodsCollections = client.db("fastFoodsBD").collection("allFastFoods");
     const cartsCollections = client.db("fastFoodsBD").collection("carts");
 
@@ -36,6 +37,18 @@ async function run() {
     app.get('/allFastFoods', async (req, res) => {
       const allFastFoods = await allFastFoodsCollections.find().toArray();
       res.send(allFastFoods);
+    })
+
+    //create user data
+    app.post('/users', async (req, res) => {
+      const data = req.body;
+      const query = {email: data.email}
+      const existingUser = await usersCollections.findOne(query);
+      if(existingUser){
+        return res.send({message: 'user already existing'})
+      }
+      const result = await usersCollections.insertOne(data);
+      res.send(result)
     })
 
     //post single user carts data
