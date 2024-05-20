@@ -10,21 +10,8 @@ const port = process.env.PORT || 5000;
 app.use(cors())
 app.use(express.json())
 
-// mongodb database start
-
-const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASSWORD}@cluster0.hoynchx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
-
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
-});
-
 // jwt verification function
-const jwtVerify = async (req, res, next) => {
+const jwtVerify = (req, res, next) => {
   const authorization = req.headers.authorization;
   if(!authorization){
     return res.status(401).send({error: true, message: 'Invalid token'})
@@ -39,6 +26,21 @@ const jwtVerify = async (req, res, next) => {
   });
 }
 
+// mongodb database start
+
+const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASSWORD}@cluster0.hoynchx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+});
+
+
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -52,7 +54,6 @@ async function run() {
     //jwt token authentication
     app.post('/jwt', (req, res) => {
       const email = req.body;
-      console.log(email);
       const token = jwt.sign( email, process.env.ACCESS_TOKEN, { expiresIn: '1h' });
       res.send({token})
     })
@@ -64,7 +65,7 @@ async function run() {
     })
 
     //get all users data from database
-    app.get('/users', async (req, res) => {
+    app.get('/users', jwtVerify, async (req, res) => {
       const result = await usersCollections.find().toArray();
       res.send(result)
     })
@@ -72,7 +73,6 @@ async function run() {
     //patch the user data to create admin
     app.patch('/users/admin/:id', async (req, res) => {
       const id = req.params.id;
-      console.log(id)
       const filter = {_id: new ObjectId(id)}
       const updateDoc = {
         $set: {
@@ -80,6 +80,20 @@ async function run() {
         }
       };
       const result = await usersCollections.updateOne(filter, updateDoc);
+      res.send(result)
+    })
+
+    //get admin in users
+    app.get('/users/admin/:email', jwtVerify, async (req, res) => {
+      const email = req.params.email;
+
+      if(req.decoded?.email !== email){
+        res.send({admin: false})
+      }
+
+      const query = {email : email}
+      const user = await usersCollections.findOne(query)
+      const result = {admin: user?.role === 'admin'}
       res.send(result)
     })
 
