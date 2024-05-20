@@ -58,6 +58,17 @@ async function run() {
       res.send({token})
     })
 
+    //check admin and verify admin
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = {email : email}
+      const user = await usersCollections.findOne(query)
+      if(user?.role !== 'admin'){
+        return res.status(401).send({error: true, message: 'Unauthorized access token'})
+      }
+      next()
+    }
+
     // get allFastFoods data
     app.get('/allFastFoods', async (req, res) => {
       const allFastFoods = await allFastFoodsCollections.find().toArray();
@@ -65,7 +76,7 @@ async function run() {
     })
 
     //get all users data from database
-    app.get('/users', jwtVerify, async (req, res) => {
+    app.get('/users', jwtVerify, verifyAdmin, async (req, res) => {
       const result = await usersCollections.find().toArray();
       res.send(result)
     })
