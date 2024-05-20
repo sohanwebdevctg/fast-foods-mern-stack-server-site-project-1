@@ -23,6 +23,22 @@ const client = new MongoClient(uri, {
   }
 });
 
+// jwt verification function
+const jwtVerify = async (req, res, next) => {
+  const authorization = req.headers.authorization;
+  if(!authorization){
+    return res.status(401).send({error: true, message: 'Invalid token'})
+  }
+  const token = authorization.split(' ')[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN, function(err, decoded) {
+    if(err){
+      return res.status(401).send({error: true, message: 'Unauthorized access token'})
+    }
+    req.decoded = decoded;
+    next()
+  });
+}
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -87,10 +103,14 @@ async function run() {
     })
 
     //get sing user carts data from email address
-    app.get('/carts', async (req, res) => {
+    app.get('/carts', jwtVerify, async (req, res) => {
       let query = {}
       if(req.query?.email){
         query = {email: req.query?.email}
+      }
+      const decoded = req.decoded.email;
+      if(req.query?.email !== decoded){
+        return res.status(403).send({error: true, message: 'Unauthorized access token'})
       }
       const result = await cartsCollections.find(query).toArray();
       res.send(result);
