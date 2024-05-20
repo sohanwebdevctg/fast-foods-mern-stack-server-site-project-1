@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 require('dotenv').config()
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
@@ -32,11 +33,38 @@ async function run() {
     const allFastFoodsCollections = client.db("fastFoodsBD").collection("allFastFoods");
     const cartsCollections = client.db("fastFoodsBD").collection("carts");
 
+    //jwt token authentication
+    app.post('/jwt', (req, res) => {
+      const email = req.body;
+      console.log(email);
+      const token = jwt.sign( email, process.env.ACCESS_TOKEN, { expiresIn: '1h' });
+      res.send({token})
+    })
 
     // get allFastFoods data
     app.get('/allFastFoods', async (req, res) => {
       const allFastFoods = await allFastFoodsCollections.find().toArray();
       res.send(allFastFoods);
+    })
+
+    //get all users data from database
+    app.get('/users', async (req, res) => {
+      const result = await usersCollections.find().toArray();
+      res.send(result)
+    })
+
+    //patch the user data to create admin
+    app.patch('/users/admin/:id', async (req, res) => {
+      const id = req.params.id;
+      console.log(id)
+      const filter = {_id: new ObjectId(id)}
+      const updateDoc = {
+        $set: {
+          role: 'admin'
+        }
+      };
+      const result = await usersCollections.updateOne(filter, updateDoc);
+      res.send(result)
     })
 
     //create user data
