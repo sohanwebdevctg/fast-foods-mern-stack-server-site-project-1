@@ -75,6 +75,21 @@ async function run() {
       res.send(allFastFoods);
     })
 
+    // post allFastFoods data
+    app.post('/allFastFoods', jwtVerify, verifyAdmin, async (req, res) => {
+      const data = req.body;
+      const result = await allFastFoodsCollections.insertOne(data);
+      res.send(result)
+    })
+
+    // delete allFastFoods data
+    app.delete('/allFastFoods/:id', jwtVerify, verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await allFastFoodsCollections.deleteOne(query);
+      res.send(result)
+    })
+
     //get all users data from database
     app.get('/users', jwtVerify, verifyAdmin, async (req, res) => {
       const result = await usersCollections.find().toArray();
